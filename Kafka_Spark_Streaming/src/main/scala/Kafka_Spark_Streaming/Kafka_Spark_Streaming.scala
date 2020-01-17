@@ -10,6 +10,9 @@ import org.apache.spark.streaming.kafka010.ConsumerStrategies.Subscribe
 import org.apache.spark.streaming._
 
 object Kafka_Spark_Streaming {
+  
+  case class schema(Name:String,Age:Int,City:String)
+  
     def main(args:Array[String]):Unit={
       
     println("Spark Execution Started")
@@ -32,7 +35,7 @@ object Kafka_Spark_Streaming {
                     )
     
     val ssc = new StreamingContext(conf,Seconds(2))
-    val topics = Array("kafkastruct01")
+    val topics = Array("kafkastruct02")
     val stream = KafkaUtils.createDirectStream[String, String](
                   ssc,
                   PreferConsistent,
@@ -45,9 +48,12 @@ object Kafka_Spark_Streaming {
     if(!x.isEmpty())
   {
 
-    val flattendata=x.flatMap(x=>x.split(","))
-    flattendata.foreach(println)
-
+/*    val df=x.map(x=>x.split(",")).map(x=>schema(x(0),x(1).toInt,x(2))).toDF()
+    df.show()*/
+    
+    val jsondf=spark.read.json(x)
+    jsondf.show()
+    
 }
 )
     ssc.start()
